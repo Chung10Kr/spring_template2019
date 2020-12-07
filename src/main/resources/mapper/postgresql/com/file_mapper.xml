@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="fileMapper">
+
+<!-- 
+CREATE SEQUENCE SEQ_FILE START 1;
+
+CREATE TABLE FILES(
+	ID VARCHAR(40) PRIMARY KEY DEFAULT NEXTVAL('SEQ_FILE'),
+	SEQ_FILE_NAME VARCHAR(4096),
+	REAL_FILE_NAME VARCHAR(4096),
+	FILE_PATH VARCHAR(4096),
+	CREATE_BY VARCHAR(100),
+	CREATE_DATE DATE
+);
+-->
+	<select id="fileSeq"  parameterType="Map"  resultType="HashMap">
+		SELECT NEXTVAL('SEQ_FILE') AS SEQ
+	</select>
+
+    <insert id="fileInsert" parameterType="Map">
+        INSERT INTO FILES
+        		(  ID, REAL_FILE_NAME, SEQ_FILE_NAME,  FILE_PATH, CREATE_BY,CREATE_DATE  )
+         VALUES ( #{seq},#{real_file_name},#{seq_file_name},#{file_path},#{login_user_id},       NOW() ) 
+    </insert>
+    
+    <select id="getFile" parameterType="Map"  resultType="HashMap">
+		SELECT REAL_FILE_NAME , FILE_PATH FROM FILES
+		 WHERE ID = #{file_seq}
+	</select>
+	<!-- 파일 리스트 조회 -->
+	<select id="getFileList" parameterType="Map"  resultType="HashMap">
+		SELECT ID,REAL_FILE_NAME FROM FILES
+		 WHERE ID IN 
+		 <foreach collection="id" item="item" separator="," open="(" close=")">
+		 	#{item}
+		 </foreach>
+		 ORDER BY REAL_FILE_NAME
+	</select>
+    
+</mapper>

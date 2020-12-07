@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="msgMnMapper">
+   <!-- 캡션 언어 조회-->
+   <select id="getList" parameterType="Map" resultType="HashMap">
+			SELECT A.LANG_ID
+			,      A.LANG
+			,      A.LANG_DESC
+			FROM   CIS_LANG_MSG A
+			,      (
+			        SELECT MINOR_CD, SORT_NO
+			        FROM   CIS_MINOR_CD_NEW
+			        WHERE  MAJOR_CD  = 'LANG'
+			        AND	   USE_YN = 'Y' 
+			       ) B
+			WHERE  A.LANG = B.MINOR_CD
+			<if test='lang!="" and lang!=null '>
+			AND   A.LANG = #{lang}
+			</if>
+			<if test='lang_id!="" and lang_id!=null '>
+			AND   A.LANG_ID LIKE '%' || UPPER(#{lang_id}) || '%'
+			</if> 
+			<if test='lang_desc!="" and lang_desc!=null '>
+			AND   A.LANG_DESC LIKE '%' || #{lang_desc} || '%'
+			</if>
+			ORDER BY LANG_ID,LANG
+   </select>
+   
+   <select id="getLang" parameterType="Map" resultType="HashMap">
+   SELECT 
+			MINOR_CD , 
+			MINOR_NM 
+	FROM 
+			CIS_MINOR_CD_NEW
+	WHERE	1=1
+		AND MAJOR_CD='LANG'
+		AND USE_YN = 'Y'
+		ORDER BY SORT_NO
+   </select>
+   
+   <insert id="insert" parameterType="Map">
+   	INSERT INTO CIS_LANG_MSG(CREATE_DATE,CREATE_BY,LANG_DESC,LANG_ID,LANG,RMK)
+	VALUES (now(),#{login_user_id},#{lang_desc},upper(#{lang_id}),#{lang},#{rmk})
+	</insert>
+	
+    <update id="update" parameterType="Map">
+		  UPDATE CIS_LANG_MSG SET
+			lang_desc = #{lang_desc},
+			rmk = #{rmk},
+			update_date = now(),
+			update_by = #{login_user_id}
+			where
+			lang_id = #{lang_id} and
+			lang = #{lang}
+    </update>
+    
+    
+</mapper> 

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="codeUtilMapper">
+
+
+	<!-- 
+	프레임워크 공통 코드 조회
+	5->지역
+	6->번호
+	7->이메일
+	-->
+    <select id="getCodeList" parameterType="Map" resultType="HashMap">
+        SELECT 
+        	   CODE AS CODE 
+        	  ,CODE_NM AS CODE_NM
+          FROM COM_CODE A 
+         WHERE UPPER_CODE_NO = #{CODEGROUP}::integer
+         ORDER BY SORT_ORDR, CODE_NO
+    </select>
+    
+    <!-- View 다국어 및 콤보 바인딩 용 조회 -->
+    <select id="getCaptionAndCodeList" parameterType="Map" resultType="HashMap">
+        SELECT  'LANG'::VARCHAR AS GB
+        ,       'lang'::VARCHAR AS CATEGORY
+		,       UPPER(A.CD) AS CD
+		,       COALESCE((SELECT LANG_DESC FROM CIS_LANG_CAPTION WHERE LANG_ID = UPPER(A.CD) AND LANG = COALESCE(#{LANG},'KO')),A.CD) AS CD_NM
+        FROM    (
+		          SELECT  REGEXP_SPLIT_TO_TABLE(#{LANG_BIND_COLS},',') AS CD
+		        ) A
+		UNION   ALL
+		SELECT  A.GB
+		,       A.CATEGORY
+		,       UPPER(A.CD)
+		,       A.CD_NM
+		FROM    (
+		          SELECT  'CODE'::VARCHAR AS GB
+		          ,       LOWER(A.CATEGORY) AS CATEGORY
+		          ,       LOWER(B.MINOR_CD) AS CD
+		          ,       B.MINOR_NM AS CD_NM
+		          FROM    (
+		                    SELECT  REGEXP_SPLIT_TO_TABLE(#{CODE_BIND_COLS},',') AS CATEGORY
+		                  ) A
+		                  LEFT JOIN CIS_MINOR_CD_NEW B
+		                  ON UPPER(A.CATEGORY) = B.MAJOR_CD   
+		                  AND 'Y' = B.USE_YN
+		          ORDER   BY A.CATEGORY, B.SORT_NO
+		        ) A
+		UNION     ALL
+		SELECT 'CODE'::VARCHAR AS GB
+		,      'comp_cd'::VARCHAR AS CATEGORY
+		,      COMP_CD AS CD
+		,      COMP_NM AS CD_NM
+		FROM   CIS_COMP    
+		WHERE  USE_YN = 'Y'
+		UNION  ALL
+		SELECT 'CODE'::VARCHAR AS GB
+		,      'plant_cd'::VARCHAR AS CATEGORY
+		,      PLANT_CD AS CD
+		,      PLANT_NM AS CD_NM
+		FROM   CIS_PLANT
+		WHERE  USE_YN = 'Y'
+		UNION  ALL
+		SELECT 'CODE'::VARCHAR AS GB
+		,      'biz_comp_cd'::VARCHAR AS CATEGORY
+		,      BIZ_COMP_CD AS CD
+		,      BIZ_COMP_NM AS CD_NM
+		FROM   CIS_BIZ_COMP
+		WHERE  USE_YN = 'Y'
+    </select>
+</mapper>

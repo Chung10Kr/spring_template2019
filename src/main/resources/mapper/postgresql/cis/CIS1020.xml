@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="CIS1020">
+    <select id="getList" parameterType="Map" resultType="HashMap">
+        select  system_id
+        ,       major_cd
+        ,       major_nm
+        ,       cd_kind
+        ,       cd_type
+        ,       rmk
+        ,       use_yn
+        from    cis_major_cd
+        where   system_id   = #{system_id}
+        and     major_nm    like #{major_nm} || '%'
+        order   by
+                system_id
+        ,       major_cd
+    </select>   
+
+    <insert id="insert">
+        insert into cis_major_cd
+        (
+            system_id
+        ,   major_cd
+        ,   major_nm
+        ,   major_nm_lang_id
+        ,   cd_kind
+        ,   cd_type
+        ,   rmk
+        ,   use_yn
+        ,   create_by
+        ,   create_date
+        ,   update_by
+        ,   update_date
+        )
+        values
+        (
+            #{system_id}
+        ,   #{major_cd}
+        ,   #{major_nm}
+        ,   #{major_nm_lang_id}
+        ,   #{cd_kind}
+        ,   #{cd_type}
+        ,   #{rmk}
+        ,   #{use_yn}
+        ,   #{login_user_id}
+        ,   now()
+        )
+    </insert>
+    <update id="update">
+        update  cis_major_cd
+        set
+                major_nm        = #{major_nm}
+        ,       major_nm_lang_id= #{major_nm_lang_id}
+        ,       cd_kind         = #{cd_kind}
+        ,       cd_type         = #{cd_type}
+        ,       rmk             = #{rmk}
+        ,       use_yn          = #{use_yn}
+        ,       update_by       = #{login_user_id}
+        ,       update_date     = now()
+        where   major_cd        = #{major_cd}
+        and     system_id       = #{system_id}
+    </update>
+    <delete id="delete">
+        delete  from cis_major_cd
+        where   major_cd        = #{major_cd}
+        and     system_id       = #{system_id}
+    </delete>
+
+</mapper> 

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="CIS2100">
+
+   <select id="getList" parameterType="Map" resultType="HashMap">
+   		SELECT  
+			        A.COMP_CD
+			,		A.PLANT_CD
+			,       CIS_COMMON_GET_PLANT_NM(COMP_CD, PLANT_CD, #{login_lang}) AS PLANT_NM
+			,       A.PART_NO
+			,       CIS_PART_GET_PART_NM(A.COMP_CD,A.PART_NO)    AS  PART_NM
+			,       A.CHLD_PART_NO
+			,		CIS_PART_GET_PART_NM(A.COMP_CD,A.CHLD_PART_NO)	AS  CHLD_PART_NM
+			,		A.ROUTE_SQ
+			,       A.QTY
+			,		A.PROC_CD
+			,       CIS_PART_GET_UNIT(A.COMP_CD, A.PART_NO) AS UNIT
+			,       A.USE_YN
+			,       TO_CHAR(A.CREATE_DATE,'YYYY-MM-DD HH24:MI:SS')  AS  CREATE_DATE
+			,       TO_CHAR(A.UPDATE_DATE,'YYYY-MM-DD HH24:MI:SS')  AS  UPDATE_DATE
+			,       A.UPDATE_BY
+			,       COALESCE(CIS_COMMON_GET_USER_NM(A.UPDATE_BY,#{login_lang}),A.UPDATE_BY)  AS  UPDATE_BY_NM
+			,       A.CREATE_BY
+			,       COALESCE(CIS_COMMON_GET_USER_NM(A.CREATE_BY,#{login_lang}),A.CREATE_BY)  AS  CREATE_BY_NM
+			,		CIS_CODE_GET_MINOR_NM('CIS','MTART',(SELECT MTART FROM CIS_PART WHERE COMP_CD = A.COMP_CD AND PART_NO = A.CHLD_PART_NO)) AS MTART_NM		--품목유형명
+			,		CIS_COMMON_GET_WB_NM(A.COMP_CD, A.PLANT_CD,A.PROC_CD, #{login_lang}) AS PROC_NM		--공정명
+			FROM    CIS_BOM A
+			WHERE   A.COMP_CD       = #{login_comp_cd}
+			<if test='use_yn!="" and use_yn!=null '>
+			AND		A.USE_YN	= #{use_yn}
+			</if>
+			<if test='plant_cd!="" and plant_cd!=null '>
+			AND     A.PLANT_CD  = #{plant_cd}
+			</if>
+			<if test='part_no!="" and part_no!=null '>
+			AND     A.PART_NO   LIKE '%' || #{part_no} || '%'
+			</if>
+			ORDER   BY
+			        A.PART_NO
+			,       TO_NUMBER(A.ROUTE_SQ)
+   </select>
+		
+</mapper> 

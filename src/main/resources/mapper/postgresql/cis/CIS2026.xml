@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="CIS2026">
+
+   <select id="getList" parameterType="Map" resultType="HashMap">
+   		SELECT 	A.COMP_CD
+		,		A.PART_NO
+		,		A.PART_NM
+		,		B.MDL_CD
+		FROM	CIS_PART A
+			LEFT JOIN CIS_MDL B ON A.COMP_CD = B.COMP_CD
+								AND A.MDL_CD = B.MDL_CD
+			WHERE	A.COMP_CD		= #{login_comp_cd}
+			AND		MTART		= '10'		--제품('10') 
+			AND		A.USE_YN	= 'Y' 
+			
+			<if test='plant_cd!="" and plant_cd!=null '>
+			AND		A.PART_NO  LIKE '%' || #{part_no} || '%'
+			</if>	
+			<if test='mdl_cd!="" and mdl_cd!=null '>
+				AND B.MDL_CD LIKE '%' || #{mdl_cd} || '%'
+			</if>
+			ORDER	BY
+					B.MDL_CD  
+					, A.PART_NO
+   </select>
+			 
+   <select id="getList2" parameterType="Map" resultType="HashMap">
+		SELECT 	
+					A.COMP_CD		--회사코드 
+			,		A.PART_NO		--품번
+			,		CIS_PART_GET_PART_NM(A.COMP_CD, A.PART_NO) AS PART_NM	--품명
+			,		A.PROC_CD		--공정코드
+			,		CIS_CODE_GET_MINOR_NM('CIS','PROC_CD', A.PROC_CD, #{login_user_id}) AS PROC_CD_NM	--공정명
+			,		A.PROC_ORD		--공정순서
+			,		A.STD_SUB_PART_NO	--반제품번
+			,		CIS_PART_GET_PART_NM(A.COMP_CD, A.STD_SUB_PART_NO) AS SUB_PART_NM		--반제품명
+			,		A.OUT_PROC_YN	--외주 공정 여부 
+			,		A.BIZ_COMP_CD	--협력사 코드
+			,		CIS_BIZ_COMP_GET_BIZ_COMP_NM(A.COMP_CD, A.BIZ_COMP_CD, #{login_user_id}) AS BIZ_COMP_NM
+			,		A.TRNKEY_YN		--Turn Key 여부
+			,		A.PRD_RGSTR_YN	--실적 등록 여부
+			,		A.CHK_YN		--검사 여부
+			,		A.INSP_YN		--검수 여부
+			,		A.DRCT_DLVY_YN	--직납 여부
+			,		A.USE_YN		--사용 여부 
+			,		A.PROC_ORD_NO
+			,		A.WC_CD
+			,		CIS_COMMON_GET_WC_NM(B.COMP_CD, B.PLANT_CD, B.WC_CD, #{login_user_id})  AS WC_NM
+			FROM	CIS_V_PROC_ROUTE	A
+			LEFT JOIN  CIS_WC B ON A.COMP_CD = B.COMP_CD
+								AND A.WC_CD = B.WC_CD
+			WHERE 1=1 	
+			AND A.COMP_CD		= #{login_comp_cd}
+			AND		A.USE_YN		= 'Y'
+			AND		A.PART_NO		= #{part_no}
+			ORDER BY A.COMP_CD
+			,		 A.PART_NO
+			,		A.PROC_ORD_NO
+   </select>
+</mapper> 
+
+

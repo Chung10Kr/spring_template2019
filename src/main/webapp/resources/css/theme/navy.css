@@ -1,0 +1,95 @@
+@charset "utf-8";
+/* Top CSS Start */
+.NAVY_Top {background-color: #343a40 !important; border: 1px solid #000000; display:inline-block;} /* 탑 배경 */
+.NAVY_Ttitle{ color:#FFFFFF !important; font-size: 22px; margin: 0px;} /* 탑 타이틀*/
+.NAVY_Tspan{ padding-left: 11px; } /* 탑 메뉴*/
+.NAVY_Tmenu{ color:#FFFFFF ; font-size: 18px ; } /* 탑 메뉴*/
+
+.NAVY_Thello{ color:#FFFFFF !important;} /* 관리자님 반갑습니다. */
+.NAVY_Tbtn{
+	background-color:#343a40 ; 
+	color:#04B404 !important; 
+	font-size: 18px ; 
+	border: 2px solid #04B404; 
+	border-radius: 5px;
+	padding: 4px 10px 4px 10px; 
+	} /* 탑 버튼*/
+.NAVY_Tbtn:hover{background-color: #FFFFFF} /* 탑 버톤 호버*/
+
+.NAVY_onTopMenu{ color:#FFFF00 !important;} /* 탑 메뉴 selected */
+/* Top Css End*/
+
+/* Nav Css Start*/
+.NAVY_Nav { background-color: #343a40 !important;border-right: 1px solid #000000;} /* 네비 배경 */
+.NAVY_Ntitle{ color:#FFFF00 !important; margin-right: 40px; } /* 네비 타이블 */
+.NAVY_Ntab{ color:#FFFFFF !important; } /* 네비 2번째 탭*/
+
+.NAVY_Nmenu{ color:#FFFFFF;
+ } /* 네비 메뉴명*/
+
+.NAVY_menuOnC> a , .NAVY_menuOnT> span{ color:#FFFF00 !important;} /* 네비 메뉴 selected */
+.NAVY_ui{
+	list-style:none;
+}
+.NAVY_ui> li:hover{
+	text-decoration:none
+}
+.NAVY_span:{
+	background-color: #000000 !important; 
+}
+/* Nav Css End*/
+
+/* Content_header Css Start*/
+.NAVY_ChTitle{
+	margin:5px 0px 0px 10px; color:#343a40 !important;
+	padding-left:18px;
+	background: url("/resources/img/com/icon1.jpg") 1px 9px no-repeat;
+	} /* 컨텐트해드 타이틀 */
+.NAVY_ChBtn{
+	background-color:#FFFFFF ; 
+	font-size: 15px; 
+	border: 1px solid #343a40; 
+	padding: 4px 8px;
+	margin: 10px 2px 10px 2px; 
+	border-radius : 5px;
+}/* 컨텐트해드 버튼*/
+.NAVY_xls {
+    background: url(/resources/img/com/icon_xls.png) 4px 9px no-repeat #1f6f43;
+    color: #fff;
+	padding: 8px 0px 8px 8px;
+}/* 컨텐트해드 엑셀 버튼 */
+.NAVY_ChBtn:hover{
+	background-color: #828282;
+	color: #FFFFFF;
+	}/* 컨텐트해드  버튼 호버 */
+/* Content_header Css End*/
+
+/* Content Css Start*/
+.NAVY_Body> .searchArea{ margin: 5px 20px 5px 5px; padding: 1px; }
+.NAVY_Body> #gridArea{ margin: 5px 20px 5px 5px; padding: 1px; }
+.NAVY_Body> #gridArea> .grid{ border: 1px solid #d4d4d4; }
+
+.NAVY_Body> .searchArea> form{ width: 100%; }
+.NAVY_Body> .searchArea> form> table{ width: 100%; }
+
+.NAVY_Body> .searchArea> form> table> tbody> tr> th{ 
+	font-weight:bold; background:#f7f7f7; text-align:right; 
+	font-family:Dotum; font-size:12px; 
+	min-height: 28px; padding-right: 15px; margin: 0px;
+	border: 1px solid #ddd; 
+	}
+.NAVY_Body> .searchArea> form> table> tbody> tr> td{ 
+	line-height:15px; padding:6px; background:#FFF; text-align:left; 
+	font-family:Dotum; font-size:12px; 
+	min-height: 28px; padding: 5px; margin: 0px;
+	border: 1px solid #ddd; 
+	}
+.NAVY_Body> .searchArea> form> table> tbody> tr> td> select, 
+.NAVY_Body> .searchArea> form> table> tbody> tr> td> input{
+	border:1px solid #d4d4d4;  font-family:Dotum; font-size:14px; margin: 1px; padding: 5px; width:97%;
+	}
+.NAVY_Body> .searchArea> form> table> tbody> tr> td> textarea{ width:99%; }
+/* Content Css End*/
+
+
+

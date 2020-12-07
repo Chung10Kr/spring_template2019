@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="CIS1090">
+   <!-- role 조회-->
+   <select id="getList" parameterType="Map" resultType="HashMap">
+			SELECT 
+				   A.COMP_CD
+	        ,      CIS_COMMON_GET_COMP_NM(A.COMP_CD, #{login_lang}) AS COMP_NM
+	        ,      A.ROLE_CD
+	        ,      A.ROLE_NM
+	        ,      A.RMK
+	        ,      A.USE_FLAG
+	        ,      TO_CHAR(A.CREATE_DATE,'YYYY-MM-DD') AS CREATE_DATE
+            ,      A.CREATE_BY
+            ,      TO_CHAR(A.UPDATE_DATE,'YYYY-MM-DD') AS UPDATE_DATE
+            ,      A.UPDATE_BY
+	        FROM   CIS_AUTH_ROLE A			       
+			WHERE 1=1
+			AND    A.COMP_CD = #{login_comp_cd}
+			<if test='role_cd!="" and role_cd!=null '> AND     A.ROLE_CD LIKE '%' || upper(#{role_cd}) || '%' </if>
+			<if test='role_nm!="" and role_nm!=null '> AND    A.ROLE_NM LIKE '%' || #{role_nm} || '%' </if>
+			<if test='use_flag!="" and use_flag!=null '> AND USE_FLAG = #{use_flag}</if>  
+			ORDER BY A.COMP_CD, A.ROLE_CD
+   </select>
+ 	<insert id="insert" parameterType="Map">
+ 	INSERT INTO CIS_AUTH_ROLE(
+ 			CREATE_DATE,CREATE_BY,COMP_CD,ROLE_CD,ROLE_NM,USE_FLAG,RMK)
+	VALUES (now(),#{login_user_id},#{login_comp_cd},upper(#{role_cd}),#{role_nm},#{use_flag},#{rmk})
+ 	</insert>  
+ 
+    <update id="update" parameterType="Map">
+		UPDATE CIS_AUTH_ROLE SET
+			role_nm = #{role_nm},
+			use_flag = #{use_flag},
+			rmk = #{rmk},
+			update_by = #{login_user_id},
+			update_date = now()
+		where
+			role_cd = #{role_cd} and
+			comp_cd = #{login_comp_cd}
+		
+    </update>
+    
+</mapper> 

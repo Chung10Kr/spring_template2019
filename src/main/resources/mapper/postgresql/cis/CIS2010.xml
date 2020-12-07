@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="CIS2010">
+
+   <select id="getList" parameterType="Map" resultType="HashMap">
+	  	SELECT A.COMP_CD
+			,      A.COMP_NM
+			,      A.COMP_NM_LANG_ID
+			,      A.ADDR
+			,      A.ADDR_LANG_ID
+			,      A.CORP_REGT_NUM
+			,      A.CEO_NM
+			,      A.BIZ_TYP
+			,      A.BIZ_KIND
+			,      A.RMK
+			,      A.USE_YN
+			FROM   (
+			        SELECT A.COMP_CD AS COMP_CD
+			        ,      COALESCE(B.LANG_DESC, A.COMP_NM) AS COMP_NM
+			        ,      A.COMP_NM_LANG_ID
+			        ,      COALESCE(C.LANG_DESC, A.ADDR) AS ADDR
+			        ,      A.ADDR_LANG_ID
+			        ,      A.RMK
+			        ,      A.USE_YN
+			        ,      A.CORP_REGT_NUM
+			        ,      A.CEO_NM
+			        ,      A.BIZ_TYP
+			        ,      A.BIZ_KIND
+			        FROM   CIS_COMP A
+			               LEFT JOIN CIS_LANG_DATA B ON A.COMP_NM_LANG_ID = B.LANG_ID AND B.LANG = #{login_lang}
+			               LEFT JOIN CIS_LANG_DATA C ON A.ADDR_LANG_ID    = B.LANG_ID AND C.LANG = #{login_lang}
+			       ) A
+			WHERE 1 = 1
+			<if test='use_yn!="" and use_yn!=null '>
+			AND    A.USE_YN           = #{use_yn} 
+			</if> 
+			<if test='comp_nm!="" and comp_nm!=null '>
+			AND    A.COMP_NM       LIKE '%'|| #{comp_nm} ||'%' 
+			</if>
+			
+			ORDER  BY A.COMP_CD
+   </select>
+   <insert id="insert" parameterType="Map">
+		INSERT INTO CIS_COMP
+			(
+			    COMP_CD
+			,   COMP_NM
+			,   COMP_NM_LANG_ID
+			,   ADDR
+			,   ADDR_LANG_ID
+			,   CORP_REGT_NUM
+			,   CEO_NM
+			,   BIZ_TYP
+			,   BIZ_KIND
+			,   RMK
+			,   USE_YN
+			,   CREATE_DATE
+			,   CREATE_BY
+			)
+			VALUES
+			(
+			    #{comp_cd}
+			,   #{comp_nm}
+			,   CIS_LANG_GET_DATA_LANG_ID()
+			,   #{addr}
+			,   CIS_LANG_GET_DATA_LANG_ID()
+			,   #{corp_regt_num}
+			,   #{ceo_nm}
+			,   #{biz_typ}
+			,   #{biz_kind}
+			,   #{rmk}
+			,   #{use_yn}
+			,   NOW()
+			,   #{login_user_id}
+			)
+            
+   </insert>
+    <update id="update" parameterType="Map">
+		UPDATE CIS_COMP SET
+			       COMP_NM  		= #{comp_nm}
+			,      ADDR     		= #{addr}
+			,      CORP_REGT_NUM 	= #{corp_regt_num}
+			,      CEO_NM 			= #{ceo_nm}
+			,      BIZ_TYP 			= #{biz_typ}
+			,      BIZ_KIND 		= #{biz_kind}
+			,      RMK      		= #{rmk}
+			,      USE_YN   		= 'Y'
+			,      UPDATE_DATE 		= now()
+			,      UPDATE_BY   		= #{login_user_id}
+			WHERE  COMP_CD  		= #{comp_cd}
+    </update>
+    <update id="delete" parameterType="Map">
+		<foreach collection="data" item="item" separator=";">
+     	   	UPDATE CIS_COMP SET
+			       USE_YN  = 'N'
+ 	        ,      UPDATE_DATE 		= now()
+			,      UPDATE_BY   		= #{login_user_id}
+			WHERE  COMP_CD  		= #{item.comp_cd}
+		</foreach>
+    </update>
+</mapper> 

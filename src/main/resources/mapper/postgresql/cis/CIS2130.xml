@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="CIS2130">
+
+   <select id="getList" parameterType="Map" resultType="HashMap">
+   		SELECT COMP_CD
+					,CIS_COMMON_GET_COMP_NM(COMP_CD, #{login_lang})	AS COMP_NM
+					,QC_CLASS										AS BAD_GRP_CD
+					,CD_NM_LOC										AS BAD_GRP_NM
+					,LARGE_CLASS									AS BAD_PROC_CD
+					,LARGE_CLASS_NM									AS BAD_PROC_NM
+					,MEDIUM_CLASS									AS BAD_DIV_CD
+					,MEDIUM_CLASS_NM								AS BAD_DIV_NM
+					,SMALL_CLASS									AS BAD_KIND_CD
+					,SMALL_CLASS_NM									AS BAD_KIND_NM
+					,BAD_REASON_CD									AS BAD_CD
+					,BAD_REASON_NM									AS BAD_NM
+			FROM CIS_BAD
+			WHERE  COMP_CD         			= #{login_comp_cd}
+			<if test='bad_grp!="" and bad_grp!=null '>
+			     AND    QC_CLASS        	= #{bad_grp}
+			</if>
+			<if test='bad_proc!="" and bad_proc!=null '>
+			     AND    LARGE_CLASS         = #{bad_proc}
+			</if>
+			<if test='bad_div!="" and bad_div!=null '>
+			     AND    MEDIUM_CLASS        = #{bad_div}
+			</if>
+			<if test='bad_kind!="" and bad_kind!=null '>
+			     AND    SMALL_CLASS        	= #{bad_kind}
+			</if>
+			<if test='bad_cd!="" and bad_cd!=null '>
+			     AND    BAD_REASON_CD       LIKE '%'|| #{bad_cd} ||'%'
+			</if>
+			<if test='bad_nm!="" and bad_nm!=null '>
+			     AND    BAD_REASON_NM        LIKE '%'|| #{bad_nm} ||'%'
+			</if>
+			ORDER  BY COMP_CD, QC_CLASS, LARGE_CLASS, MEDIUM_CLASS, SMALL_CLASS, BAD_REASON_CD
+			
+   </select>
+		
+</mapper> 

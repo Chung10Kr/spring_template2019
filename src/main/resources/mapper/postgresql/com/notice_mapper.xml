@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="noticeMapper">
+   <select id="getList" parameterType="Map" resultType="HashMap">
+      SELECT 
+		      SEQ , 
+		      TITLE,
+		      TO_CHAR(CREATE_DATE,'YYYY-MM-DD') AS CREATE_DATE,
+		      CREATE_BY 
+        FROM 
+      		  CIS_NOTICE
+       WHERE 1=1
+       		AND USE_YN = 'Y'
+      <if test='title!="" and title!=null '>
+     		AND TITLE like '%'||#{title}||'%'
+      </if>
+      <if test='create_by!="" and create_by!=null '>
+     		AND CREATE_BY like '%'||#{create_by}||'%'
+      </if>
+      <if test='startDay!="" and startDay!=null '>
+        <![CDATA[   AND CREATE_DATE >= #{startDay}::DATE ]]>
+      </if>
+      <if test='endDay!="" and endDay!=null '>
+     	<![CDATA[ 	AND CREATE_DATE <= #{endDay}::DATE ]]>
+      </if>
+   </select>
+
+	<select id="get" parameterType="Map" resultType="HashMap">
+		SELECT 
+				SEQ,
+				TITLE, 
+				CONTENT,
+				ATTACH_FILE_NO, 
+				CREATE_BY AS CREATER, 
+				TO_CHAR(CREATE_DATE,'YYYY-MM-DD') AS CREATEDATE, 
+				COALESCE(TO_CHAR(UPDATE_DATE,'YYYY-MM-DD'),'') AS UPDATEDATE,
+				CASE WHEN CREATE_BY = #{login_user_id} THEN 'Y' ELSE 'N' END AS UPDAUTH <!-- 수정권한 부여 -->
+		  FROM CIS_NOTICE
+		 WHERE 1=1 
+		   AND USE_YN = 'Y'
+		   AND SEQ=#{seq}::numeric
+	</select>
+   <insert id="insert" parameterType="Map">
+	 INSERT INTO CIS_NOTICE(SEQ, TITLE,CONTENT,CREATE_BY,CREATE_DATE,ATTACH_FILE_NO ) 
+	 VALUES( NEXTVAL('CIS_SQ_NOTICE') ,#{title},#{content},#{login_user_id},now(),#{attach_file_no})
+   </insert>
+   <update id="update" parameterType="Map">
+   	UPDATE CIS_NOTICE SET
+		   TITLE = #{title},
+		   ATTACH_FILE_NO = #{attach_file_no},
+		   CONTENT = #{content},
+		   UPDATE_BY = #{login_user_id},
+		   UPDATE_DATE = now()
+     WHERE 
+		SEQ = #{seq}::numeric
+   </update>
+   <update id="delete" parameterType="Map">
+     	<foreach collection="data" item="item" separator=";">
+     	   	UPDATE CIS_NOTICE SET
+		   	       USE_YN = 'N',
+		           UPDATE_BY = #{login_user_id},
+		  		   UPDATE_DATE = now()
+             WHERE 
+		           SEQ = #{item.seq}::numeric
+		</foreach>
+   </update>
+   
+    <!-- Excel Download-->
+	<select id="getExcel" parameterType="Map" resultType="java.util.LinkedHashMap">
+	  <!-- 엑셀 여부 필요 -->
+	</select>
+	
+	
+	
+	
+    
+</mapper> 

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="menuMapper">
+	
+		
+	<!-- top 메뉴 조회 -->
+    <select id="getTopMenuList" parameterType="Map" resultType="HashMap">
+SELECT  MCD.SYSTEM_ID AS SYSTEM_ID
+,           MCD.MENU_NM AS SYSTEM_NM
+,           MCD.RMK AS RMK
+,           MCD.SORT_NO AS SORT_NO
+FROM    CIS_MENU MCD
+		INNER JOIN
+		CIS_AUTH_ROLE_USER ROL
+ON
+		ROL.USER_ID = #{login_user_id}
+AND  ROL.COMP_CD = '10'
+		INNER JOIN
+		CIS_AUTH_ROLE_MENU RMU
+ON
+		ROL.ROLE_CD = RMU.ROLE_CD 
+AND     RMU.SYSTEM_ID = MCD.SYSTEM_ID
+WHERE   MCD.PARENT_MENU_ID = 'SYSTEM_ID'
+AND     MCD.USE_YN = 'Y'
+GROUP   BY MCD.SYSTEM_ID, MCD.MENU_NM, MCD.RMK, MCD.SORT_NO
+ORDER   BY MCD.SORT_NO
+    </select>
+    
+    
+    
+    
+    
+    
+    
+    <!-- left 메뉴 조회 -->
+    <select id="getLeftMenuList" parameterType="Map" resultType="HashMap">
+			
+WITH RECURSIVE SEARCH_MENU(
+SYSTEM_ID, SYSTEM_NM, MENU_ID, MENU_NM, PARENT_MENU_ID, PGM_ID, MENU_URL, DISP_YN, USE_YN, FORM_PARAM, LEVEL, PRIV, USE_CD, EXP, PATH, CYCLE
+) AS(
+	SELECT  MNU.SYSTEM_ID
+	,       MNU.MENU_NM  AS SYSTEM_NM
+	,       MNU.MENU_ID
+	,       CIS_LANG_GET_MENU_LANG_DESC(MNU.SYSTEM_ID, MNU.MENU_ID, 'KO') AS MENU_NM
+	,       MNU.PARENT_MENU_ID
+	,       MNU.PGM_ID
+	,       MNU.MENU_URL
+	,       MNU.DISP_YN
+	,       MNU.USE_YN
+	,       MNU.FORM_PARAM
+	,       0 AS MENU_DEPTH
+	,       RMU.PERM AS PRIV
+	,       CMC.USE_CD AS USE_CD
+	,       '0' AS IS_EXP
+	,       ARRAY[MNU.SORT_NO]
+	,       FALSE
+	FROM    CIS_MENU MNU 	INNER JOIN (
+					SELECT  SYSTEM_ID
+					,       MENU_ID
+					,       STRING_AGG(PERM_CD, '') AS PERM
+					FROM   (SELECT  DISTINCT SYSTEM_ID
+						,       MENU_ID
+						,       PERM_CD
+						FROM    CIS_AUTH_ROLE_MENU
+						WHERE  (COMP_CD, ROLE_CD) in (SELECT  COMP_CD, ROLE_CD
+							 FROM    CIS_AUTH_ROLE_USER
+							 WHERE   USER_ID = #{login_user_id}
+							 AND     COMP_CD = '10') 
+						) B
+					GROUP   BY SYSTEM_ID, MENU_ID) RMU ON MNU.SYSTEM_ID   = RMU.SYSTEM_ID
+									  AND MNU.MENU_ID     = RMU.MENU_ID
+				LEFT OUTER JOIN (
+					SELECT  SYSTEM_ID
+					,       MENU_ID
+					,       STRING_AGG(USE_CD, '') AS USE_CD
+					FROM   (SELECT  DISTINCT SYSTEM_ID
+						,       MENU_ID
+						,       USE_CD
+						FROM    CIS_MENU_CONTROL
+						WHERE   COMP_CD = '10') A
+						GROUP   BY SYSTEM_ID, MENU_ID
+						) CMC ON MNU.SYSTEM_ID   = CMC.SYSTEM_ID
+							 AND MNU.MENU_ID     = CMC.MENU_ID
+	WHERE   MNU.USE_YN      = 'Y'
+	AND     MNU.DISP_YN     = 'Y'
+	AND	MNU.PARENT_MENU_ID ='SYSTEM_ID'
+	UNION ALL
+	SELECT  MNU.SYSTEM_ID
+	,       MNU.MENU_NM AS SYSTEM_NM
+	,       MNU.MENU_ID
+	,       CIS_LANG_GET_MENU_LANG_DESC(MNU.SYSTEM_ID, MNU.MENU_ID, 'KO') AS MENU_NM
+	,       MNU.PARENT_MENU_ID
+	,       MNU.PGM_ID
+	,       MNU.MENU_URL
+	,       MNU.DISP_YN
+	,       MNU.USE_YN
+	,       MNU.FORM_PARAM
+	,       LEVEL + 1 AS MENU_DEPTH
+	,       RMU.PERM AS PRIV
+	,       CMC.USE_CD AS USE_CD
+	,       '0' AS IS_EXP
+	,       PATH || MNU.SORT_NO
+	,       MNU.SORT_NO = ANY(PATH)
+	FROM    CIS_MENU MNU 	INNER JOIN SEARCH_MENU RM ON MNU.PARENT_MENU_ID = RM.MENU_ID
+				INNER JOIN (
+					SELECT  SYSTEM_ID
+					,       MENU_ID
+					,       STRING_AGG(PERM_CD, '') AS PERM
+					FROM   (SELECT  DISTINCT SYSTEM_ID
+						,       MENU_ID
+						,       PERM_CD
+						FROM    CIS_AUTH_ROLE_MENU
+						WHERE  (COMP_CD, ROLE_CD) in (SELECT  COMP_CD, ROLE_CD
+							 FROM    CIS_AUTH_ROLE_USER
+							 WHERE   USER_ID = #{login_user_id}
+							 AND     COMP_CD = '10') 
+						) B
+					GROUP   BY SYSTEM_ID, MENU_ID) RMU ON MNU.SYSTEM_ID   = RMU.SYSTEM_ID
+									  AND MNU.MENU_ID     = RMU.MENU_ID
+				LEFT OUTER JOIN (
+					SELECT  SYSTEM_ID
+					,       MENU_ID
+					,       STRING_AGG(USE_CD, '') AS USE_CD
+					FROM   (SELECT  DISTINCT SYSTEM_ID
+						,       MENU_ID
+						,       USE_CD
+						FROM    CIS_MENU_CONTROL
+						WHERE   COMP_CD = '10') A
+						GROUP   BY SYSTEM_ID, MENU_ID
+						) CMC ON MNU.SYSTEM_ID   = CMC.SYSTEM_ID
+							 AND MNU.MENU_ID     = CMC.MENU_ID
+	WHERE   MNU.USE_YN      = 'Y'
+	AND     MNU.DISP_YN     = 'Y'
+	AND     NOT CYCLE
+)
+SELECT A.* FROM (
+SELECT	
+    '/USR/LMENU/'||SYSTEM_ID||'/'|| MENU_ID AS MENUURL,
+    SYSTEM_ID||'/'|| MENU_ID AS MENU_SEQ,
+	MENU_URL AS SOURCE_PATH, 
+	SYSTEM_ID, SYSTEM_NM, MENU_ID, MENU_NM, PARENT_MENU_ID, LEVEL AS MENU_DEPTH, 
+	PRIV,
+	USE_CD, 
+	EXP
+FROM	SEARCH_MENU
+WHERE   SYSTEM_ID=#{SYSTEM_ID}
+ORDER BY PATH ) A
+	<if test='setTopMenu == "_Y"'>
+		WHERE 
+			PARENT_MENU_ID != 'SYSTEM_ID'
+		AND PARENT_MENU_ID != SYSTEM_ID
+			LIMIT 1
+	</if>
+
+    </select>
+  
+  
+</mapper>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="CIS2020">
+
+   <select id="getList" parameterType="Map" resultType="HashMap">
+	  	
+	  	SELECT A.COMP_CD
+			,      A.COMP_NM
+			,      A.PLANT_CD
+			,      A.PLANT_NM
+			,      A.PLANT_NM_LANG_ID
+			,      A.ADDR
+			,      A.ADDR_LANG_ID
+			,      A.RMK
+			,      A.USE_YN
+			,      A.CORP_REG_NUM
+			FROM   (
+			        SELECT A.COMP_CD
+			        ,      CIS_COMMON_GET_COMP_NM(A.COMP_CD, #{login_lang}) AS COMP_NM
+			        ,      A.PLANT_CD
+			        ,      CIS_COMMON_GET_PLANT_NM(A.COMP_CD, A.PLANT_CD, #{login_lang}) AS PLANT_NM
+			        ,      A.PLANT_NM_LANG_ID
+			        ,      A.ADDR
+			        ,      A.ADDR_LANG_ID
+			        ,      A.RMK
+			        ,      A.USE_YN
+			        ,      A.CORP_REG_NUM
+			        FROM   CIS_PLANT A
+			       ) A
+			WHERE 1=1
+			<if test='use_yn!="" and use_yn!=null '>
+			AND    A.USE_YN   = #{use_yn}
+			</if>  
+			<if test='comp_cd!="" and comp_cd!=null '>
+			AND    A.COMP_CD  = #{comp_cd}
+			</if>
+			<if test='comp_nm!="" and comp_nm!=null '>
+			AND    A.COMP_NM LIKE '%' || #{comp_nm}|| '%'
+			</if>
+			
+			<if test='plant_nm!="" and plant_nm!=null '>
+			AND    A.PLANT_NM LIKE '%' || #{plant_nm}|| '%'
+			</if>
+			<if test='plant_cd!="" and plant_cd!=null '>
+			AND    A.PLANT_CD LIKE '%' || #{plant_cd} || '%'
+			</if> 
+			
+			ORDER BY A.COMP_CD, A.PLANT_CD
+   </select>
+   <insert id="insert" parameterType="Map">
+		INSERT INTO CIS_PLANT
+			(
+			    COMP_CD
+			,   PLANT_CD
+			,   PLANT_NM
+			,   PLANT_NM_LANG_ID
+			,   ADDR
+			,   ADDR_LANG_ID
+			,   RMK
+			,   USE_YN
+			,   CREATE_DATE
+			,   CREATE_BY
+			,   CORP_REG_NUM
+			)
+			VALUES
+			(
+			    #{comp_cd}
+			,   #{plant_cd}
+			,   #{plant_nm}
+			,   CIS_LANG_GET_DATA_LANG_ID()
+			,   #{addr}
+			,   CIS_LANG_GET_DATA_LANG_ID()
+			,   #{RMK}
+			,   'Y'
+			,   NOW()
+			,   #{login_user_id}
+			,   #{corp_reg_num}
+			)
+   </insert>
+    <update id="update" parameterType="Map">
+		UPDATE CIS_PLANT SET
+			       PLANT_NM      = #{plant_nm}       
+			,      ADDR          = #{addr}
+			,      RMK           = #{rmk}
+			,      USE_YN        = #{use_yn}
+			,      CORP_REG_NUM  = #{corp_reg_num}
+			,      UPDATE_DATE   = NOW()
+			,      UPDATE_BY     = #{login_user_id}
+			WHERE  COMP_CD       = #{comp_cd}
+			AND    PLANT_CD      = #{plant_cd}
+    </update>
+    <update id="delete" parameterType="Map">
+		<foreach collection="data" item="item" separator=";">
+     	   	UPDATE CIS_PLANT SET
+			       USE_YN     = 'N'
+			WHERE  COMP_CD    = #{comp_cd}
+			AND    PLANT_CD   = #{plant_cd}
+		</foreach>
+    </update>
+</mapper> 

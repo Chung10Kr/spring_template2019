@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="CIS1060">
+   <select id="getList" parameterType="Map" resultType="HashMap">
+			 select user_id
+             ,      user_nm
+             ,      user_pwd
+             ,		pm_id
+             ,      pm_pwd
+             ,      emp_no
+             ,      use_yn
+             ,      comp_cd
+             ,      biz_comp_cd
+             ,      plant_cd
+             ,      wb_cd
+             ,      biz_comp_fg
+             ,      dept_cd
+             ,      rmk
+             ,      create_by
+             ,      create_date
+             ,      update_by
+             ,      update_date
+             from   cis_user
+             where  1 = 1
+             <if test='biz_comp_fg!="" and biz_comp_fg!=null '>
+             and biz_comp_fg	= #{biz_comp_fg} 
+             </if>	
+             <if test='biz_comp_cd!="" and biz_comp_cd!=null '>
+             	and	biz_comp_cd like '%' || #{biz_comp_cd} || '%'
+             </if>
+             <if test='comp_cd!="" and comp_cd!=null '>
+             	and	comp_cd		= #{comp_cd}
+             </if>
+             <if test='user_id!="" and user_id!=null '>
+                and user_id like '%' || #{user_id} || '%'
+             </if>
+             <if test='user_nm!="" and user_nm!=null '>
+                and user_nm like '%' || #{user_nm} || '%'
+             </if>
+             <if test='use_yn!="" and use_yn '>
+                and use_yn = #{use_yn}
+             </if>
+             order  by comp_cd, plant_cd, user_nm
+    </select>
+			  
+ 	<insert id="insert" parameterType="Map">
+			insert into cis_user
+			(
+			     user_id
+			,    user_nm
+			,    user_pwd
+			,    pm_pwd
+			,    emp_no
+			,    comp_cd
+			,    biz_comp_cd
+			,    lang
+			,    rmk
+			,    create_by
+			,    create_date
+			,    use_yn
+			,    plant_cd
+			,    wb_cd
+			,    biz_comp_fg
+			,    dept_cd
+			,	 pm_id
+			)
+			values
+			(
+			     #{user_id}
+			,    #{user_nm}
+			,    #{user_pwd}
+			,    #{pm_pwd}
+			,    #{emp_no}
+			,    #{comp_cd}
+			,    #{biz_comp_cd}
+			,    #{login_lang}
+			,    #{rmk}
+			,    #{login_user_id}
+			,    now()
+			,    #{use_yn}
+			,    #{plant_cd}
+			,    #{wb_cd}
+			,    #{emp_no}
+			,    #{dept_cd}
+			,	 case when trim(#{pm_id}) = '' then #{user_id} else #{pm_id} end
+			)
+ 	</insert>  
+ 
+    <update id="update" parameterType="Map">
+			update cis_user
+			set    user_nm      = #{user_nm}
+			,      user_pwd     = #{user_pwd}
+			,      pm_pwd       = #{pm_pwd}
+			,      emp_no       = #{emp_no}
+			,      comp_cd      = #{comp_cd}
+			,      biz_comp_cd  = #{biz_comp_cd}
+			,      lang         = #{lang}
+			,      rmk          = #{rmk}
+			,      use_yn       = #{use_yn}
+			,      plant_cd     = #{plant_cd}
+			,      wb_cd        = #{wb_cd}
+			,      dept_cd      = #{dept_cd}
+			,	   pm_id		= case when trim(#{pm_id}) = '' then #{user_id} else :#{pm_id} end
+			,      update_by    = #{login_user_id}
+			,      update_date  = now()
+			where  user_id      = #{user_id}
+    </update>
+    
+</mapper>
+

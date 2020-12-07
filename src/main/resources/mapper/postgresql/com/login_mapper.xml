@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="loginMapper">
+	
+		
+	<!-- getMember 회원 정보 조회 -->
+    <select id="getMember" parameterType="Map" resultType="HashMap">
+			SELECT  
+					 USR.USER_ID
+			,        CIS_COMMON_GET_USER_NM(USR.USER_ID,'KO') AS USER_NM
+			,        USR.EMP_NO
+			,        USR.COMP_CD
+			,        CIS_COMMON_GET_COMP_NM(USR.COMP_CD,'KO') AS COMP_NM
+			,        USR.BIZ_COMP_CD
+			,        CIS_BIZ_COMP_GET_BIZ_COMP_NM(USR.COMP_CD,USR.BIZ_COMP_CD,'KO') AS BIZ_COMP_NM
+			,        USR.PLANT_CD
+			,        CIS_COMMON_GET_PLANT_NM(USR.COMP_CD,USR.PLANT_CD,'KO') AS PLANT_NM
+			,        USR.WB_CD
+			,        CIS_COMMON_GET_WB_NM(USR.COMP_CD,USR.PLANT_CD,WB_CD,'KO') AS WB_NM
+			,        ROL.USER_ROLE
+			,       (CASE WHEN USR.EMP_NO IS NOT NULL THEN 'A1' ELSE 'Z1' END) AS USER_TYP
+			,        USR.RMK
+			,        BIZ_COMP_FG
+			,        LANG
+			,        THEME
+			FROM     CIS_USER USR
+					 LEFT OUTER JOIN
+					 (SELECT USER_ID
+						 ,       STRING_AGG(ROLE_CD, ',') AS USER_ROLE
+						 FROM   CIS_AUTH_ROLE_USER
+						 WHERE  COMP_CD = '10'
+						 AND     USER_ID = #{userId}
+						 GROUP  BY USER_ID
+					 ) ROL
+			ON
+					 USR.USER_ID = ROL.USER_ID
+			WHERE    USR.USER_ID     = #{userId}
+			AND      USR.USER_PWD    = #{passwd}
+			AND      USR.USE_YN      = 'Y'
+    </select>
+  
+</mapper>

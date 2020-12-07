@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="CIS1150">
+   <!-- role 조회-->
+   <select id="getList" parameterType="Map" resultType="HashMap">
+	   SELECT IDN
+			, COMP_CD
+			, CIS_COMMON_GET_COMP_NM(COMP_CD, #{login_lang})               AS COMP_NM
+			, PLANT_CD
+			, CIS_COMMON_GET_PLANT_NM(COMP_CD, PLANT_CD, #{login_lang})    AS PLANT_NM
+			, BIZ_COMP_CD
+			, CIS_BIZ_COMP_GET_BIZ_COMP_NM(COMP_CD, BIZ_COMP_CD, #{login_lang})    AS BIZ_COMP_NM
+			, BAR_CD
+			, TRS_CD
+			, TO_CHAR(TRS_DATE, 'YYYY-MM-DD HH24:MI:SS') AS TRS_DATE
+			, TRS_BY
+			, CIS_COMMON_GET_USER_NM(TRS_BY, #{login_lang}) TRS_BY_NM
+			, FR_STRG_LOC
+			, CASE WHEN FR_STRG_LOC = 'NONE' THEN 'NONE'
+			       ELSE CIS_CODE_GET_MINOR_NM('CIS', 'STRG_LOC', FR_STRG_LOC, #{login_lang}) END AS FR_STRG_LOC_NM
+			, FR_LD_LOC
+			, TO_STRG_LOC
+			, CASE WHEN TO_STRG_LOC = 'NONE' THEN 'NONE'
+			       ELSE CIS_CODE_GET_MINOR_NM('CIS', 'STRG_LOC', TO_STRG_LOC, #{login_lang}) END AS TO_STRG_LOC_NM
+			, TO_LD_LOC
+			, QTY
+			, PROC_QTY
+			, TRG_CTRL
+			, PRE_QTY
+			, WC_CD
+			, PAR_BAR_CD
+			, ST_DIV
+			, PART_NO
+			, CIS_PART_GET_PART_NM(COMP_CD, PART_NO)    AS PART_NM
+			, REF_PART_NO
+			, FR_ERP_STRG_LOC
+			, TO_ERP_STRG_LOC
+			, RMK
+			, TRS_YMD
+			FROM CIS_TAG_HIST
+			WHERE BAR_CD = #{bar_cd}
+			ORDER BY IDN asc
+   </select>
+ 	
+    
+</mapper> 

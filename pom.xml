@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<!-- Maven repository define -->
+    <repositories>
+        <repository>
+            <id>hitec_repo</id>
+            <url>http://ss.hitecis.co.kr:8081/nexus/content/groups/public</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>hitec_repo</id>
+            <url>http://ss.hitecis.co.kr:8081/nexus/content/groups/public</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+	<!-- Maven Profile define -->
+    <profiles><!-- 프로파일을 통해 빌드시 환경을 달리하여 빌드할 수 있다. String Replacer를 위한 설정 -->
+        <profile>
+            <id>sames_local</id><!-- 개발자용 -->
+            <build>
+                <finalName>SAMES</finalName>
+            </build>
+            <properties>
+               <server.address>http://localhost:8080/SAMES</server.address>
+               <project.key>SAMES_LOCAL</project.key>
+               <env>local</env>
+            </properties>
+            <activation><!-- 기본으로 설정될 프로파일임을 설정한다. -P 옵션없이 빌드하면 기본설정 -->
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <id>sames_dev</id><!-- 테스트서버용 -->
+            <build>
+                <finalName>ROOT</finalName>
+            </build>
+            <properties>
+               <server.address>http://localhost:8080/SAMES</server.address>
+               <project.key>SAMES_DEV</project.key>
+               <env>dev</env>
+            </properties>
+        </profile>
+        <profile>
+            <id>sames_real</id><!-- 운영서버용 -->
+            <build>
+                <finalName>ROOT</finalName>
+            </build>
+            <properties>
+               <server.address>http://192.168.0.235</server.address>
+               <project.key>SAMES</project.key>
+               <misc.flag>1</misc.flag>
+               <env>real</env>
+            </properties>
+        </profile>
+    </profiles>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>kr.co</groupId>
+	<artifactId>hitecis</artifactId>
+	<name>Hitec</name>
+	<packaging>war</packaging>
+	<version>1.0.0-BUILD-SNAPSHOT</version>
+	<properties>
+		<java-version>1.8</java-version>
+		<org.springframework-version>5.0.8.RELEASE</org.springframework-version>
+		<org.aspectj-version>1.8.13</org.aspectj-version>
+		<org.slf4j-version>1.7.25</org.slf4j-version>
+	</properties>
+	<dependencies>
+		<!-- Spring -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${org.springframework-version}</version>
+			<exclusions>
+				<!-- Exclude Commons Logging in favor of SLF4j -->
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				 </exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${org.springframework-version}</version>
+		</dependency>
+		
+		
+<!-- The complete Tiles dependency with all supported technologies is achievable with the following dependency declaration: -->
+<dependency>
+    <groupId>org.apache.tiles</groupId>
+    <artifactId>tiles-extras</artifactId>
+    <version>3.0.8</version>
+</dependency>
+ 
+<!-- The basic Tiles dependency with only servlet support can be added this way: -->
+<dependency>
+    <groupId>org.apache.tiles</groupId>
+    <artifactId>tiles-servlet</artifactId>
+    <version>3.0.8</version>
+</dependency>
+ 
+<!-- If you need a dependency to Tiles JSP support, Declare the dependency this way: -->
+<dependency>
+    <groupId>org.apache.tiles</groupId>
+    <artifactId>tiles-jsp</artifactId>
+    <version>3.0.8</version>
+</dependency>
+		
+				
+		<!-- AspectJ -->
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjrt</artifactId>
+			<version>${org.aspectj-version}</version>
+		</dependency>	
+		
+		<!-- Logging -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${org.slf4j-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>${org.slf4j-version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>${org.slf4j-version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.15</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.mail</groupId>
+					<artifactId>mail</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.jms</groupId>
+					<artifactId>jms</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.sun.jdmk</groupId>
+					<artifactId>jmxtools</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.sun.jmx</groupId>
+					<artifactId>jmxri</artifactId>
+				</exclusion>
+			</exclusions>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- @Inject -->
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<version>1</version>
+		</dependency>
+				
+		<!-- Servlet -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>jsp-api</artifactId>
+			<version>2.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.2</version>
+		</dependency>
+	
+		<!-- Test -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.7</version>
+			<scope>test</scope>
+		</dependency>   
+		
+		
+		<!-- 스프링에서 JDBC 를 사용하기 위한 라이브러리 입니다. -->
+		<dependency>
+		   <groupId>org.springframework</groupId>
+		   <artifactId>spring-jdbc</artifactId>
+		   <version>${org.springframework-version}</version>
+		</dependency>
+		
+		
+		<!-- 컨넥션 풀을 위한 라이브러리 -->
+		<dependency>
+		    <groupId>commons-dbcp</groupId>
+		    <artifactId>commons-dbcp</artifactId>
+		    <version>1.4</version>
+		</dependency>
+		
+		<!-- 오라클 JDBC 드라이버 -->
+		
+		<!-- <dependency>
+		    <groupId>com.oracle</groupId>
+		    <artifactId>ojdbc6</artifactId>
+		    <version>12.1.0.2</version>
+		</dependency> -->
+
+		<dependency>
+		    <groupId>org.apache.poi</groupId>
+		    <artifactId>poi-ooxml</artifactId>
+		    <version>3.9</version>
+		</dependency>
+		
+  		<dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.2.1</version>
+        </dependency>
+         
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
+        </dependency>
+		
+		<!-- MyBatis 라이브러리 -->
+		<dependency>
+		    <groupId>org.mybatis</groupId>
+		    <artifactId>mybatis</artifactId>
+		    <version>3.4.6</version>
+		</dependency>
+		
+		<!-- 마이바티스와 스프링 연동을 위한 라이브러리 -->
+		
+		<dependency>
+		    <groupId>org.mybatis</groupId>
+		    <artifactId>mybatis-spring</artifactId>
+		    <version>1.3.2</version>
+		</dependency>
+		<!-- postgresql -->
+		<dependency>
+		    <groupId>org.postgresql</groupId>
+		    <artifactId>postgresql</artifactId>
+		    <version>42.2.5</version>
+		</dependency> 
+		
+		<!-- JSON -->
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-core</artifactId>
+		    <version>2.9.3</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-annotations</artifactId>
+		    <version>2.9.3</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-databind</artifactId>
+		    <version>2.9.3</version>
+		</dependency>  
+		<dependency>
+		    <groupId>org.json</groupId>
+		    <artifactId>json</artifactId>
+		    <version>20190722</version>
+		</dependency>  
+		<!-- Egov Framework -->
+		<dependency>
+		  <groupId>egovframework</groupId>
+		  <artifactId>egovframework.rte.bat.core</artifactId>
+		  <version>3.1.0</version>
+		</dependency>
+		<dependency>
+		  <groupId>egovframework</groupId>
+		  <artifactId>egovframework.rte.fdl.cmmn</artifactId>
+		  <version>3.1.0</version>
+		</dependency>
+		<dependency>
+		  <groupId>egovframework</groupId>
+		  <artifactId>egovframework.rte.fdl.excel</artifactId>
+		  <version>3.1.0</version>
+		</dependency>
+		<dependency>
+		  <groupId>egovframework</groupId>
+		  <artifactId>egovframework.rte.fdl.filehandling</artifactId>
+		  <version>3.1.0</version>
+		</dependency>
+		<dependency>
+		  <groupId>egovframework</groupId>
+		  <artifactId>egovframework.rte.fdl.idgnr</artifactId>
+		  <version>3.1.0</version>
+		</dependency>
+		<dependency>
+		  <groupId>egovframework</groupId>
+		  <artifactId>egovframework.rte.fdl.logging</artifactId>
+		  <version>3.1.0</version>
+		</dependency>
+		<dependency>
+		  <groupId>egovframework</groupId>
+		  <artifactId>egovframework.rte.fdl.property</artifactId>
+		  <version>3.1.0</version>
+		</dependency>
+		<dependency>
+		  <groupId>egovframework</groupId>
+		  <artifactId>egovframework.rte.fdl.security</artifactId>
+		  <version>3.1.0</version>
+		</dependency>
+		<dependency>
+		  <groupId>egovframework</groupId>
+		  <artifactId>egovframework.rte.fdl.string</artifactId>
+		  <version>3.1.0</version>
+		</dependency>
+		<dependency>
+		  <groupId>egovframework</groupId>
+		  <artifactId>egovframework.rte.psl.dataaccess</artifactId>
+		  <version>3.1.0</version>
+		</dependency>
+		<dependency>
+		  <groupId>egovframework</groupId>
+		  <artifactId>egovframework.rte.ptl.mvc</artifactId>
+		  <version>3.1.0</version>
+		</dependency>
+		<dependency>
+		  <groupId>sbe</groupId>
+		  <artifactId>sbe-dynamic-tiles2</artifactId>
+		  <version>1.2.2</version>
+		</dependency>
+	</dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-eclipse-plugin</artifactId>
+                <version>2.9</version>
+                <configuration>
+                    <additionalProjectnatures>
+                        <projectnature>org.springframework.ide.eclipse.core.springnature</projectnature>
+                    </additionalProjectnatures>
+                    <additionalBuildcommands>
+                        <buildcommand>org.springframework.ide.eclipse.core.springbuilder</buildcommand>
+                    </additionalBuildcommands>
+                    <downloadSources>true</downloadSources>
+                    <downloadJavadocs>true</downloadJavadocs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                    <compilerArgument>-Xlint:all</compilerArgument>
+                    <showWarnings>true</showWarnings>
+                    <showDeprecation>true</showDeprecation>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <configuration>
+                    <mainClass>org.test.int1.Main</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

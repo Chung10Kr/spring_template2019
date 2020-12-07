@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="authMapper">
+   <!-- role 조회-->
+   <select id="getList" parameterType="Map" resultType="HashMap">
+			SELECT 
+				   A.COMP_CD
+	        ,      A.ROLE_CD
+	        ,      A.ROLE_NM
+	        FROM   CIS_AUTH_ROLE A			       
+			WHERE 1=1
+			<if test='system_id!="" and system_id!=null '> AND    A.COMP_CD = #{login_comp_cd} </if>
+			<if test='system_id!="" and system_id!=null '> AND     A.ROLE_CD LIKE '%' || #{role_cd} || '%' </if>
+			<if test='system_id!="" and system_id!=null '> AND    A.ROLE_NM LIKE '%' || :ROLE_NM || '%' </if>
+			<if test='system_id!="" and system_id!=null '> AND    A.USE_FLAG   = CASE WHEN :USE_FLAG = '' THEN A.USE_FLAG ELSE :USE_FLAG END </if>  
+			ORDER BY A.COMP_CD, A.ROLE_CD
+   </select>
+   
+   <!-- 권한 조회 -->
+ 	<select id="getAuthList" parameterType="Map" resultType="HashMap">
+ 	 WITH RECURSIVE SEARCH_MENU(
+					SYSTEM_ID
+			,       MENU_ID
+			,       MENU_NM
+			,       PARENT_MENU_ID
+			,       PGM_ID
+			,       MENU_URL
+			,       DISP_YN
+			,       USE_YN
+			,       SORT_NO
+			,       RMK
+			,       MENU_NM_LANG_ID
+			,       USER_ID
+			,       PERM_USE
+			,       PERM_AD 
+			,       PERM_RE 
+			,       PERM_DE 
+			,       PERM_SA 
+			,		LEVEL
+			,		PATH
+			) AS (
+				SELECT 	A.SYSTEM_ID
+				,      	A.MENU_ID AS MENU_ID
+				,	CIS_LANG_GET_MENU_LANG_DESC(A.SYSTEM_ID, A.MENU_ID, #{login_lang}) AS MENU_NM
+				,      	A.PARENT_MENU_ID
+				,      	A.PGM_ID
+				,      	A.MENU_URL
+				,      	A.DISP_YN
+				,      	A.USE_YN
+				,      	A.SORT_NO
+				,      	A.RMK
+				,      	A.MENU_NM_LANG_ID
+				,      	TEXT(#{login_user_id}) AS USER_ID
+				,     (CASE WHEN STRPOS(RMU.PERM_CD, 'U') > 0 THEN 'U' ELSE '0' END) AS PERM_USE
+				,     (CASE WHEN STRPOS(RMU.PERM_CD, 'A') > 0 THEN 'A' ELSE '0' END) AS PERM_AD
+				,     (CASE WHEN STRPOS(RMU.PERM_CD, 'R') > 0 THEN 'R' ELSE '0' END) AS PERM_RE
+				,     (CASE WHEN STRPOS(RMU.PERM_CD, 'D') > 0 THEN 'D' ELSE '0' END) AS PERM_DE
+				,     (CASE WHEN STRPOS(RMU.PERM_CD, 'S') > 0 THEN 'S' ELSE '0' END) AS PERM_SA
+				,		0 AS LEVEL
+				, 		COALESCE(A.MENU_ID, A.SYSTEM_ID)
+				FROM   	CIS_MENU A	LEFT OUTER JOIN CIS_AUTH_ROLE ROL ON ROL.COMP_CD = #{login_comp_cd}
+											 AND ROL.ROLE_CD = #{role_cd}
+							LEFT OUTER JOIN
+								       (SELECT COMP_CD
+								       ,		ROLE_CD 
+									,       SYSTEM_ID
+									,       MENU_ID
+									,       STRING_AGG(PERM_CD, '') AS PERM_CD
+									FROM    CIS_AUTH_ROLE_MENU
+									WHERE   COMP_CD = #{login_comp_cd}
+									GROUP   BY COMP_CD, ROLE_CD, SYSTEM_ID, MENU_ID) RMU ON RMU.COMP_CD = #{login_comp_cd}
+														   AND ROL.COMP_CD = RMU.COMP_CD
+														   AND ROL.ROLE_CD = RMU.ROLE_CD
+														   AND RMU.SYSTEM_ID = A.SYSTEM_ID
+														   AND RMU.MENU_ID = A.MENU_ID
+				WHERE   A.USE_YN = 'Y'
+				AND     A.DISP_YN = 'Y'
+				<!-- AND	A.PARENT_MENU_ID IN ( SELECT	MINOR_CD FROM 	CIS_MINOR_CD WHERE 	SYSTEM_ID = 'CIS' AND     MAJOR_CD  = 'SYSTEM_ID' AND	USE_YN	  = 'Y') -->
+				AND	A.PARENT_MENU_ID ='SYSTEM_ID'
+				UNION ALL
+				SELECT 	A.SYSTEM_ID
+				,      	A.MENU_ID AS MENU_ID
+				,		CIS_LANG_GET_MENU_LANG_DESC(A.SYSTEM_ID, A.MENU_ID, #{login_lang}) AS MENU_NM
+				,      	A.PARENT_MENU_ID
+				,      	A.PGM_ID
+				,      	A.MENU_URL
+				,      	A.DISP_YN
+				,      	A.USE_YN
+				,      	A.SORT_NO
+				,      	A.RMK
+				,      	A.MENU_NM_LANG_ID
+				,      	TEXT(#{login_user_id}) AS USER_ID
+				,     (CASE WHEN STRPOS(RMU.PERM_CD, 'U') > 0 THEN 'U' ELSE '0' END) AS PERM_USE
+				,     (CASE WHEN STRPOS(RMU.PERM_CD, 'A') > 0 THEN 'A' ELSE '0' END) AS PERM_AD
+				,     (CASE WHEN STRPOS(RMU.PERM_CD, 'R') > 0 THEN 'R' ELSE '0' END) AS PERM_RE
+				,     (CASE WHEN STRPOS(RMU.PERM_CD, 'D') > 0 THEN 'D' ELSE '0' END) AS PERM_DE
+				,     (CASE WHEN STRPOS(RMU.PERM_CD, 'S') > 0 THEN 'S' ELSE '0' END) AS PERM_SA
+				,		LEVEL + 1
+				,		PATH||'>'||A.MENU_ID
+				FROM   	CIS_MENU A	INNER JOIN SEARCH_MENU RM ON A.PARENT_MENU_ID = RM.MENU_ID
+							LEFT OUTER JOIN CIS_AUTH_ROLE ROL ON ROL.COMP_CD = #{login_comp_cd}
+											 AND ROL.ROLE_CD = #{role_cd}
+							LEFT OUTER JOIN
+								       (SELECT COMP_CD 
+								       ,		ROLE_CD
+									,       SYSTEM_ID
+									,       MENU_ID
+									,       STRING_AGG(PERM_CD, '') AS PERM_CD
+									FROM    CIS_AUTH_ROLE_MENU
+									WHERE   COMP_CD = #{login_comp_cd}
+									GROUP   BY COMP_CD, ROLE_CD, SYSTEM_ID, MENU_ID) RMU ON RMU.COMP_CD = #{login_comp_cd}
+														   AND ROL.COMP_CD = RMU.COMP_CD
+														   AND ROL.ROLE_CD = RMU.ROLE_CD
+														   AND RMU.SYSTEM_ID = A.SYSTEM_ID
+														   AND RMU.MENU_ID = A.MENU_ID
+				WHERE   A.USE_YN = 'Y'
+				AND     A.DISP_YN = 'Y'
+			       )
+			SELECT	PATH
+			,       SYSTEM_ID
+			,       MENU_ID
+			,       MENU_NM
+			,       PARENT_MENU_ID
+			,       PGM_ID
+			,       MENU_URL
+			,       DISP_YN
+			,       USE_YN
+			,       SORT_NO
+			,       RMK
+			,       MENU_NM_LANG_ID
+			,       USER_ID
+			,       PERM_USE::VARCHAR AS PERM_USE
+			,       PERM_AD::VARCHAR AS PERM_AD
+			,       PERM_RE::VARCHAR AS PERM_RE
+			,       PERM_DE::VARCHAR AS PERM_DE
+			,       PERM_SA::VARCHAR AS PERM_SA
+			,       #{role_cd} AS ROLE_CD
+			,       #{login_comp_cd} AS COMP_CD
+			,       SYSTEM_ID||MENU_ID AS THIS_ID <!-- 본인 자신의 Unique Key--> 
+			,       SYSTEM_ID||PARENT_MENU_ID AS PARENT_ID <!-- 부모의 Unique Key-->
+			FROM	SEARCH_MENU
+			WHERE 1=1
+			<if test='menu_nm!="" and menu_nm!=null '>
+			     AND    menu_nm            LIKE '%' || #{menu_nm} ||'%'
+			</if>
+			ORDER BY SYSTEM_ID,PATH
+ 	</select>
+ 	
+ 	
+ 	<!-- 권한삭제 -->
+ 	<delete id="deleteAuth"  parameterType="Map">
+   			DELETE 
+   				FROM CIS_AUTH_ROLE_MENU
+   			 WHERE 
+   			 system_id = #{system_id}
+   			 AND menu_id = #{menu_id}
+   			 AND comp_cd = #{login_comp_cd}
+   			 AND role_cd = #{role_cd}
+ 	</delete>
+ 	
+    <!-- 권한부여 -->
+    <insert id="insertAuth" parameterType="Map">
+			INSERT INTO CIS_AUTH_ROLE_MENU(
+			CREATE_BY,CREATE_DATE,
+			SYSTEM_ID,MENU_ID,PERM_CD,
+			COMP_CD,ROLE_CD
+			)
+			VALUES (
+			#{login_user_id},NOW(),
+			#{system_id},#{menu_id},#{authCode},
+			#{login_comp_cd},#{role_cd}
+			)
+    </insert>
+    
+</mapper> 

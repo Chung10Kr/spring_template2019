@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="btnAuthMapper">
+   <!-- 권한 조회 -->
+ 	<select id="getAuthList" parameterType="Map" resultType="HashMap">
+ 		  
+	        WITH RECURSIVE SEARCH_MENU(
+					SYSTEM_ID
+			,       MENU_ID
+			,       MENU_NM
+			,       PARENT_MENU_ID
+			,       PGM_ID
+			,       MENU_URL
+			,       DISP_YN
+			,       USE_YN
+			,       SORT_NO
+			,       RMK
+			,       MENU_NM_LANG_ID
+			,       USER_ID
+			,		COMP_CD
+			,       USE_AD
+			,       USE_RE
+			,       USE_DE
+			,       USE_SA
+			,       USE_EA
+			,		LEVEL
+			,		PATH
+			) AS (
+				SELECT 	A.SYSTEM_ID
+				,      	A.MENU_ID AS MENU_ID
+				,		CIS_LANG_GET_MENU_LANG_DESC(A.SYSTEM_ID, A.MENU_ID, #{login_lang}) AS MENU_NM
+				,      	A.PARENT_MENU_ID
+				,      	A.PGM_ID
+				,      	A.MENU_URL
+				,      	A.DISP_YN
+				,      	A.USE_YN
+				,      	A.SORT_NO
+				,      	A.RMK
+				,      	A.MENU_NM_LANG_ID
+				,      	TEXT(#{login_user_id}) AS USER_ID
+				,      	TEXT(#{login_comp_cd}) AS COMP_CD
+				,      (CASE WHEN INSTR(RMU.USE_CD, 'A', 1) > 0 THEN 'A' ELSE '0' END) AS USE_AD
+				,      (CASE WHEN INSTR(RMU.USE_CD, 'R', 1) > 0 THEN 'R' ELSE '0' END) AS USE_RE
+				,      (CASE WHEN INSTR(RMU.USE_CD, 'D', 1) > 0 THEN 'D' ELSE '0' END) AS USE_DE
+				,      (CASE WHEN INSTR(RMU.USE_CD, 'S', 1) > 0 THEN 'S' ELSE '0' END) AS USE_SA
+				,      (CASE WHEN INSTR(RMU.USE_CD, 'E', 1) > 0 THEN 'E' ELSE '0' END) AS USE_EA
+				,		0 AS LEVEL
+				, 		COALESCE(A.MENU_ID, A.SYSTEM_ID)
+				FROM   	CIS_MENU A	LEFT OUTER JOIN
+								       (SELECT COMP_CD 
+									,       SYSTEM_ID
+									,       MENU_ID
+									,       STRING_AGG(USE_CD, '') AS USE_CD
+									FROM    CIS_MENU_CONTROL
+									WHERE   COMP_CD = #{login_comp_cd}
+									GROUP   BY COMP_CD, SYSTEM_ID, MENU_ID) RMU ON RMU.COMP_CD = #{login_comp_cd}
+																			   AND RMU.SYSTEM_ID = A.SYSTEM_ID
+																			   AND RMU.MENU_ID = A.MENU_ID
+				WHERE   A.USE_YN = 'Y'
+				AND     A.DISP_YN = 'Y'
+				<!-- AND	A.PARENT_MENU_ID IN ( SELECT	MINOR_CD FROM 	CIS_MINOR_CD WHERE 	SYSTEM_ID = 'CIS' AND     MAJOR_CD  = 'SYSTEM_ID' AND	USE_YN	  = 'Y') -->
+				AND	A.PARENT_MENU_ID ='SYSTEM_ID'
+				--START   WITH A.PARENT_MENU_ID = A.SYSTEM_ID
+				--CONNECT BY A.PARENT_MENU_ID = PRIOR A.MENU_ID
+				--ORDER   SIBLINGS BY A.SORT_NO
+				UNION ALL
+				SELECT 	A.SYSTEM_ID
+				,      	A.MENU_ID AS MENU_ID
+				,		CIS_LANG_GET_MENU_LANG_DESC(A.SYSTEM_ID, A.MENU_ID, #{login_lang}) AS MENU_NM
+				,      	A.PARENT_MENU_ID
+				,      	A.PGM_ID
+				,      	A.MENU_URL
+				,      	A.DISP_YN
+				,      	A.USE_YN
+				,      	A.SORT_NO
+				,      	A.RMK
+				,      	A.MENU_NM_LANG_ID
+				,      	TEXT(#{login_user_id}) AS USER_ID
+				,      	TEXT(#{login_comp_cd}) AS COMP_CD
+				,      (CASE WHEN INSTR(RMU.USE_CD, 'A', 1) > 0 THEN 'A' ELSE '0' END) AS USE_AD
+				,      (CASE WHEN INSTR(RMU.USE_CD, 'R', 1) > 0 THEN 'R' ELSE '0' END) AS USE_RE
+				,      (CASE WHEN INSTR(RMU.USE_CD, 'D', 1) > 0 THEN 'D' ELSE '0' END) AS USE_DE
+				,      (CASE WHEN INSTR(RMU.USE_CD, 'S', 1) > 0 THEN 'S' ELSE '0' END) AS USE_SA
+				,      (CASE WHEN INSTR(RMU.USE_CD, 'E', 1) > 0 THEN 'E' ELSE '0' END) AS USE_EA
+				,		LEVEL + 1
+				,		PATH||'>'||A.MENU_ID
+				FROM   	CIS_MENU A	INNER JOIN SEARCH_MENU RM ON A.PARENT_MENU_ID = RM.MENU_ID
+									LEFT OUTER JOIN
+								       (SELECT COMP_CD 
+									,       SYSTEM_ID
+									,       MENU_ID
+									,       STRING_AGG(USE_CD, '') AS USE_CD
+									FROM    CIS_MENU_CONTROL
+									WHERE   COMP_CD = #{login_comp_cd}
+									GROUP   BY COMP_CD, SYSTEM_ID, MENU_ID) RMU ON RMU.COMP_CD = #{login_comp_cd}
+																			   AND     RMU.SYSTEM_ID = A.SYSTEM_ID
+																			   AND     RMU.MENU_ID = A.MENU_ID
+				WHERE   A.USE_YN = 'Y'
+				AND     A.DISP_YN = 'Y'
+			       )
+			SELECT	PATH,COMP_CD 
+			,       SYSTEM_ID
+			,       MENU_ID
+			,       MENU_NM
+			,       PARENT_MENU_ID
+			,       PGM_ID
+			,       MENU_URL
+			,       DISP_YN
+			,       USE_YN
+			,       SORT_NO
+			,       RMK
+			,       MENU_NM_LANG_ID
+			,       USER_ID
+			,       USE_AD::VARCHAR as USE_AD
+			,       USE_RE::VARCHAR as USE_RE
+			,       USE_DE::VARCHAR as USE_DE
+			,       USE_SA::VARCHAR as USE_SA
+			,       USE_EA::VARCHAR as USE_EA
+			,       SYSTEM_ID||MENU_ID AS THIS_ID <!-- 본인 자신의 Unique Key--> 
+			,       SYSTEM_ID||PARENT_MENU_ID AS PARENT_ID <!-- 부모의 Unique Key-->
+			FROM	SEARCH_MENU
+			WHERE 1=1
+			<if test='system_id!="" and system_id!=null '>
+			     AND    SYSTEM_ID  = #{system_id}
+			</if>
+			<if test='menu_nm!="" and menu_nm!=null '>
+			     AND    menu_nm            LIKE '%' || #{menu_nm} ||'%'
+			</if>
+			
+			ORDER BY SYSTEM_ID,PATH
+ 	</select>
+ 	
+ 	<!--CIS_MENU_CONTROL; -->
+ 	<!-- 권한삭제 -->
+ 	<delete id="deleteAuth"  parameterType="Map">
+   			DELETE FROM CIS_MENU_CONTROL
+   			WHERE
+	   			COMP_CD=#{login_comp_cd} and
+				SYSTEM_ID=#{system_id} and
+				MENU_ID=#{menu_id}
+ 	</delete>
+ 	
+ 	
+    <!-- 권한부여 -->
+    <insert id="insertAuth" parameterType="Map">
+			INSERT INTO CIS_MENU_CONTROL(
+				CREATE_DATE,CREATE_BY,
+				MENU_ID,USE_CD,COMP_CD,SYSTEM_ID
+			)
+			VALUES (
+				now(),#{login_user_id},
+				#{menu_id},#{authCode},#{login_comp_cd},#{system_id}
+			)
+    </insert>
+    
+</mapper> 

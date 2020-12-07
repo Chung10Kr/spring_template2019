@@ -1,0 +1,21 @@
+@charset "utf-8";
+
+@page a4sheet{size:21.0cm 29.7cm}
+.a4{
+	page:a4sheet; page-break-after: always; 
+	/* border: 1px solid #000000; */ 
+	padding: 10px;
+	text-align: center;
+	}
+
+.print_table> tbody> tr> th { font-weight:bold; background:#f7f7f7; text-align:right; border:1px solid #000000;
+font-family:Dotum; font-size:14px;  padding: 5px;
+height: 30px;
+}
+.print_table> tbody> tr> td { background:#FFF; text-align:left; border:1px solid #000000;
+font-family:Dotum; font-size:12px;  padding: 5px;
+height: 30px;
+}
+.print_bottm{
+	position: fixed; bottom: 0; width: 100%;
+} 

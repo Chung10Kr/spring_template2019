@@ -1,0 +1,17 @@
+--INSERT문
+ SELECT 'INSERT INTO '||UPPER('cis_menu')||'('||array_to_string(array_agg(upper(COLUMN_NAME)),',')||')' 
+  FROM INFORMATION_SCHEMA.COLUMNS 
+ where TABLE_NAME    = LOWER('cis_menu') 
+union all 
+ SELECT 'VALUES ('||array_to_string(array_agg('#{'||lower(COLUMN_NAME)||'}'),',')||')' 
+  FROM INFORMATION_SCHEMA.COLUMNS 
+ where TABLE_NAME    = LOWER('cis_menu'); 
+
+--UPDATE 문  
+SELECT 'UPDATE CIS_MENU SET' ss  
+ UNION ALL
+ SELECT 
+ COLUMN_NAME||' = ' ||'#{'||lower(COLUMN_NAME)||'},'||''
+  FROM INFORMATION_SCHEMA.COLUMNS
+ WHERE 
+   TABLE_NAME    = lower('CIS_MENU');

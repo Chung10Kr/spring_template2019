@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="memberMapper">
+   <select id="getList" parameterType="Map" resultType="HashMap">
+       SELECT USER_ID
+             ,      USER_NM
+             ,      USER_PWD
+             ,      PM_PWD
+             ,      PM_PWD AS ORG_PM_PWD
+             ,      COMP_CD
+             ,      CIS_COMMON_GET_COMP_NM(COMP_CD, #{login_lagn}) AS COMP_NM
+             ,      BIZ_COMP_CD
+             <!-- ,      CIS_BIZ_COMP_GET_BIZ_COMP_NM(:LOGIN_COMP_CD, BIZ_COMP_CD, #{login_lagn}) AS BIZ_COMP_NM -->
+             ,      LANG
+             ,      RMK
+             ,      USER_NM_LANG_ID
+             ,      USE_YN
+             ,      EMP_NO
+             ,      PLANT_CD
+             ,      CIS_COMMON_GET_PLANT_NM(COMP_CD, PLANT_CD, #{login_lagn}) AS PLANT_NM
+             ,      WB_CD
+             ,      CIS_COMMON_GET_WB_NM(COMP_CD, PLANT_CD, WB_CD, #{login_lagn}) AS WB_NM
+             ,      CASE WHEN EMP_NO IS NULL OR EMP_NO = '' THEN '1' ELSE '0' END AS GUBUN
+             ,      BIZ_COMP_FG
+             ,      DEPT_CD
+             ,		DEPT_NM
+             ,      CREATE_BY
+             ,      CREATE_DATE
+             ,      UPDATE_BY
+             ,      UPDATE_DATE
+             ,		PM_ID
+             FROM   CIS_USER
+             WHERE  1 = 1
+             <if test='biz_comp_fg!="" and biz_comp_fg!=null '>
+             	AND	BIZ_COMP_FG	= #{biz_comp_fg}
+             </if> 
+             <if test='biz_comp_cd!="" and biz_comp_cd!=null '>
+             	AND	BIZ_COMP_CD LIKE '%' || #{biz_comp_cd} || '%'
+             </if>
+             <if test='comp_cd!="" and comp_cd!=null '>
+             	AND	COMP_CD		= #{login_comp_cd}
+             </if>
+             <if test='wb_cd!="" and wb_cd!=null '>
+             	AND	WB_CD		= #{wb_cd}
+             </if>
+             <if test='user_id!="" and user_id!=null '>
+                AND USER_ID LIKE '%' || #{user_id} || '%'
+             </if>
+             <if test='user_nm!="" and user_nm!=null '>
+                AND USER_NM LIKE '%' || #{user_nm} || '%'
+             </if>
+             <if test='use_yn!="" and use_yn!=null '>
+                AND USE_YN = #{use_yn}
+             </if>
+             ORDER  BY COMP_CD, PLANT_CD, USER_NM
+   </select>
+
+<!-- 회원 조회 -->
+	<select id="get" parameterType="Map" resultType="HashMap">
+		SELECT * FROM CIS_USER
+		WHERE
+		USER_ID=#{login_user_id}
+	</select>
+	<!-- 패스워드 테마 변경 -->
+	 <update id="updatePwd" parameterType="Map">
+	  UPDATE CIS_USER SET
+	  <if test='user_pwd!="" and user_pwd!=null '> USER_PWD = #{user_pwd} </if>
+	  <if test='cis_theme!="" and cis_theme!=null '> THEME = #{cis_theme} </if>
+	   WHERE
+	   USER_ID = #{login_user_id}
+  
+   </update>
+   <insert id="insert" parameterType="Map">
+	  </insert>
+   <update id="update" parameterType="Map">
+  
+   </update>
+   <update id="delete" parameterType="Map">
+     	<foreach collection="data" item="item" separator=";">
+	   		<!-- 삭제여부 Y_N 추가 필요 -->
+		</foreach>
+   </update>
+   
+    <!-- Excel Download-->
+	<select id="getExcel" parameterType="Map" resultType="java.util.LinkedHashMap">
+	  <!-- 엑셀 여부 필요 -->
+	</select>
+	
+	
+	
+	
+    
+</mapper> 

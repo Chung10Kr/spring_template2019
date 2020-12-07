@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="authRoleMapper">
+
+ 
+    <select id="getList" parameterType="map" resultType="hashmap">
+   		   select
+     			 a.role_cd
+				,a.role_nm
+				,a.comp_cd
+			from
+      			cis_auth_role a  
+      		where a.use_flag = 'Y'
+    </select>
+	<select id="getAuthList" parameterType="map" resultType="hashmap">
+			select 
+			case when b.user_id is null then 'N' else 'Y' end as role_auth
+			, a.user_id , a.user_nm , 
+			#{comp_cd} as comp_cd, 
+			#{role_cd} as role_cd
+			from cis_user a
+			left join cis_auth_role_user b on b.user_id=a.user_id and b.comp_cd=#{comp_cd} and  B.role_cd=#{role_cd}
+
+	</select>	
+	
+	<delete id="deleteAuth" parameterType="Map">
+		delete from cis_auth_role_user where user_id=#{user_id} and comp_cd=#{comp_cd} and role_cd=#{role_cd}
+	</delete>
+	<insert id="insertAuth" parameterType="Map">
+		insert into cis_auth_role_user(create_date,user_id,rmk,create_by,comp_cd,role_cd)
+			values (now(),#{user_id},#{rmk},#{login_user_id},#{comp_cd},#{role_cd})
+	</insert>
+</mapper> 
+
+

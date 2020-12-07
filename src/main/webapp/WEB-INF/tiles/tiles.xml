@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE tiles-definitions PUBLIC
+  "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+  "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+ 
+<tiles-definitions>
+    <!-- 화면의 기초가 되는 base -->
+    <definition name="default" template="/WEB-INF/views/layout/defaultLayout.jsp">
+        <put-attribute name="nav"    value="/WEB-INF/views/layout/nav.jsp" />
+        <put-attribute name="header" value="/WEB-INF/views/layout/header.jsp" />
+        <put-attribute name="content_header" value="/WEB-INF/views/layout/content_header.jsp" />
+    </definition>
+    <!-- 동적 매핑. 만약 /user/login의 경로라면 /WEB-INF/views/user/login.jsp 뷰를 가져온다. -->
+    <!-- /VWR/ 레이아웃 적용 -->
+    <definition name="/VWR/*" extends="default">
+        <put-attribute name="body" value="/WEB-INF/views/{1}.jsp" />
+    </definition>
+    <definition name="/VWR/*/*" extends="default">
+         <put-attribute name="body" value="/WEB-INF/views/{1}/{2}.jsp" />
+    </definition>
+    
+    
+    <!-- /NVWR/ 레이아웃 미적용 -->
+    <definition name="NVWR" template="/WEB-INF/views/layout/nonLayout.jsp">
+        <put-attribute name="body" value=""/>  
+    </definition>
+	<definition name="/NVWR/*" extends="NVWR">
+          <put-attribute name="body" value="/WEB-INF/views/{1}.jsp"/>
+    </definition>
+    <definition name="/NVWR/*/*" extends="NVWR">
+         <put-attribute name="body" value="/WEB-INF/views/{1}/{2}.jsp" />
+    </definition>
+    
+    <!-- /MOBILE/ 레이아웃 미적용 -->
+    <definition name="MOBILE" template="/WEB-INF/views/layout/mobileLayout.jsp">
+        <put-attribute name="body" value=""/>  
+    </definition>
+    <definition name="/MOBILE/*/*" extends="MOBILE">
+         <put-attribute name="body" value="/WEB-INF/views/MOBILE/{1}/{2}.jsp" />
+    </definition>
+    
+</tiles-definitions>
+

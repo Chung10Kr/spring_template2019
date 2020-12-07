@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="CIS2120">
+
+   <select id="getList" parameterType="Map" resultType="HashMap">
+   		  select a.comp_cd
+			,      cis_common_get_comp_nm(a.comp_cd, #{login_lang}) as comp_nm
+			,      a.mdl_cd
+			,      a.mdl_nm
+			,      a.use_yn
+			from   (
+			        select a.comp_cd
+			        ,      cis_common_get_comp_nm(a.comp_cd, #{login_lang}) as comp_nm
+			        ,      a.mdl_cd
+			        ,      a.mdl_nm
+			        ,      a.mdl_nm_lang_id
+			        ,      a.rmk
+			        ,      a.use_yn
+			        from   cis_mdl a
+			        ) a
+			where  1=1
+			<if test='comp_cd!="" and comp_cd!=null '>
+			and    a.comp_cd  = #{comp_cd}
+			</if>
+			<if test='mdl_nm!="" and mdl_nm!=null '>
+			and    a.mdl_nm like '%' || #{mdl_nm} || '%'
+			</if>
+			order  by a.comp_cd, a.mdl_cd
+   </select>
+	<insert id="insert" parameterType="Map">
+		INSERT INTO CIS_MDL
+			(
+			    COMP_CD
+			,   MDL_CD
+			,   MDL_NM
+			,   MDL_NM_LANG_ID
+			,   RMK
+			,   USE_YN
+			,   CREATE_DATE
+			,   CREATE_BY
+			)
+			VALUES
+			(
+			    #{comp_cd}
+			,   #{mdl_cd}
+			,   #{mdl_nm}
+			,   cis_lang_get_data_lang_id()
+			,   #{rmk}
+			,   #{use_yn}
+			,   NOW()
+			,   #{login_user_id}
+			
+			)
+	</insert>			
+	<update id="update" parameterType="Map">
+			update cis_mdl set
+			       mdl_nm      = #{mdl_nm}       
+			,      rmk           = #{rmk}
+			,      use_yn        = #{use_yn}
+			,      update_date   = now()
+			,      update_by     = #{login_user_id}
+			where  comp_cd       = #{comp_cd}
+			and    mdl_cd      = #{mdl_cd}
+	</update>		
+</mapper> 

@@ -1,0 +1,54 @@
+기능에 대한 명시화 name rule
+
+1. 목적 -> 변수 및 함수에 대한 명시적 선언
+
+2. 방법 -> 객체화(Object)
+
+	* 초기화작업 = Init.js
+
+		변수 = ex) G_INIT
+	
+	* Data Transaction = Ajax.js
+
+		변수 = ex) G_AJAX
+
+	* 외부 컴포넌트 = Cmp.js
+
+		변수 = ex) G_CMP
+
+	* 기타 = Comm.js
+		
+		변수 = ex) G_ COMM
+		
+		
+		
+
+
+
+url 패턴 정의
+
+	/컨트롤구분/화면ID/서비스(조회,입력,수정,삭제,처리,업로드...)
+	
+	1. 컨트롤 구분
+	  1) 업무 -> JOB OR BIZ -> /JOB/???/???
+	  2) 사용자 -> USR -> /USR/???/???
+	  3) 레이아웃(화면이동) -> VWR -> /VWR/???/??? ,  레이아웃미적용->NVWR
+	  	*레이아웃의 경우 /VWR/???/??? , NVWR/???/???의  첫번째 ???는 폴더명 두번쨰 ???는 파일명 이다.
+	  4) 서브 -> UTL/???/???
+	
+	2. 화면 ID
+	  1) JSP Name
+	
+	3. 서비스
+	  1) 조회 -> get, getList
+	  2) 입력 -> insert
+	  3) 수정 -> update
+	  4) 삭제 -> delete
+	
+	
+	
+	ex) 
+	/JOB/CIS2130/getList
+	/JOB/CIS1200/delete
+	/JOB/CIS1200P/delete
+	/UTL/CODE/select		
